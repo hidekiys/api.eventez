@@ -9,7 +9,6 @@ import { verifyEventDay, verifyPayment } from './services/crons';
 import {Socket} from 'socket.io'
 const cors = require('cors');
 const { Server } = require('socket.io');
-import  './global.d.ts';
 
 mongoConnect();
 

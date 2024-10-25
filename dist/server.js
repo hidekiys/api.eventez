@@ -12,7 +12,6 @@ var http_1 = __importDefault(require("http"));
 var crons_1 = require("./services/crons");
 var cors = require('cors');
 var Server = require('socket.io').Server;
-require("./global.d.ts");
 (0, mongoDb_1.mongoConnect)();
 var server = (0, express_1.default)();
 var httpServer = http_1.default.createServer(server);
