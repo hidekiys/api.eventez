@@ -1,3 +1,4 @@
+
 import { Request, response, Response } from 'express';
 const nodemailer = require("nodemailer");
 const jwt = require('jsonwebtoken');
@@ -11,6 +12,7 @@ import sharp from 'sharp';
 import { storage } from '../data/firebase';
 import { newNotification } from './notifications';
 import Budget from '../models/Budget';
+import { jwtType } from '../types/jwtType';
 interface MulterRequest extends Request {
     file: any;
 }
@@ -20,7 +22,7 @@ export const getPartnerController = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const partnerLogin = await Partner.findById(decoded.userId);
         await Event.find().then(async (events)=>{
@@ -56,7 +58,7 @@ export const getBudgetsController = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const partner = await Partner.findById(decoded.userId);
         return res.json(partner?.budgets)
@@ -67,7 +69,7 @@ export const getNotificationsController = async (req: Request, res:Response) => 
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const partner = await Partner.findById(decoded.userId);
         return res.json(partner?.notifications)
@@ -87,7 +89,7 @@ export const putCreateBudget = async (req: Request, res:Response) => {
     
     const { eventId, budgetId, description, value }:BodyType = req.body;
 
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         console.log(req.body)
         try{
@@ -121,7 +123,7 @@ export const getPartnerEventsController = async (req: Request, res:Response) => 
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const partner = await Partner.findById(decoded.userId);
         await Event.find().then(async (events)=>{
@@ -152,7 +154,7 @@ export const getPartnerEventController = async (req: Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
     const id = req.headers.eventid;
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const partner = await Partner.findById(decoded.userId).then(async (partner)=>{
             await Event.find().then(async (events)=>{
@@ -167,14 +169,14 @@ export const getPartnerEventController = async (req: Request, res:Response) => {
     })
 }
 
-export const putPartnerAvatar = async (req: MulterRequest, res: Response) => {
+export const putPartnerAvatar = async (req: Request, res: Response) => {
     
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         return decoded.userId
-    }).then(async(id) => {const user = await Partner.findById(id)
+    }).then(async(id:string) => {const user = await Partner.findById(id)
         if(user){
         
             
@@ -200,7 +202,7 @@ export const putPartnerAvatar = async (req: MulterRequest, res: Response) => {
                     },
                     () => {
                         getDownloadURL(uploadTask.snapshot.ref).then( async (url)  => {
-                            fs.unlink(`./uploads/${req.file?.filename}`, function(err){
+                            fs.unlink(`./uploads/${req.file?.filename}`, function(err:Error){
                                 if(err) console.log(err);
                             });
                             await Partner.findByIdAndUpdate(id, {$set:{url_avatar:url}})
@@ -218,14 +220,14 @@ export const putPartnerAvatar = async (req: MulterRequest, res: Response) => {
     })
 }
 
-export const putPartnerImage = async (req: MulterRequest, res: Response) => {
+export const putPartnerImage = async (req: Request, res: Response) => {
 
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         return decoded.userId
-    }).then(async(id) => {const user = await Partner.findById(id)
+    }).then(async(id:string) => {const user = await Partner.findById(id)
         if(user){
             const imageId = user.images?.length
             
@@ -250,7 +252,7 @@ export const putPartnerImage = async (req: MulterRequest, res: Response) => {
                         },
                         () => {
                             getDownloadURL(uploadTask.snapshot.ref).then(async (url) => {
-                                fs.unlink(`./uploads/${req.file?.filename}`, function (err) {
+                                fs.unlink(`./uploads/${req.file?.filename}`, function (err:Error) {
                                     if (err) console.log(err);
                                 });
                                 await Partner.findByIdAndUpdate(id, { $push: { images: url } });
@@ -268,14 +270,14 @@ export const putPartnerImage = async (req: MulterRequest, res: Response) => {
     })
 }
 
-export const putPartnerBanner = async (req: MulterRequest, res: Response) => {
+export const putPartnerBanner = async (req: Request, res: Response) => {
     
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         return decoded.userId
-    }).then(async(id) => {const user = await Partner.findById(id)
+    }).then(async(id:string) => {const user = await Partner.findById(id)
         if(user){
             
         
@@ -299,7 +301,7 @@ export const putPartnerBanner = async (req: MulterRequest, res: Response) => {
                         },
                         () => {
                             getDownloadURL(uploadTask.snapshot.ref).then(async (url) => {
-                                fs.unlink(`./uploads/${req.file?.filename}`, function (err) {
+                                fs.unlink(`./uploads/${req.file?.filename}`, function (err:Error) {
                                     if (err) console.log(err);
                                 });
                                 await Partner.findByIdAndUpdate(id, { $set: { banner: url } });
@@ -342,7 +344,7 @@ export const getPartnerAddressController = async (req: Request, res:Response) =>
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const partner = await Partner.findById(decoded.userId);
         return res.json(partner?.local)
@@ -353,7 +355,7 @@ export const getPartnerBanner = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const partner = await Partner.findById(decoded.userId);
         return res.json(partner?.banner)
@@ -372,7 +374,7 @@ export const putPartnerAddress = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     const { local } = req.body
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         await Partner.findByIdAndUpdate(decoded.userId, {$set:{local}}).then(() => {
             return res.status(202).send('Endereço alterado com sucesso')
@@ -387,7 +389,7 @@ export const putPartnerAddress = async (req: Request, res:Response) => {
 export const getPartnerImages = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         await Partner.findById(decoded.userId).then((partner)=>{
             const data = partner?.images
             return res.status(200).json(data);
@@ -399,7 +401,7 @@ export const getPartnerImages = async (req: Request, res:Response) => {
 export const getPartnerOfferServices = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         await Partner.findById(decoded.userId).then((partner)=>{
             const data = partner?.offerServices
             return res.status(200).json(data);
@@ -413,14 +415,15 @@ export const deletePartnerImage = async (req: Request, res: Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     const { index } = req.params;
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const partner = await Partner.findById(decoded.userId)
         if(partner){
+            const i = parseInt(index)
             const storageRef = ref(storage, `partnerImages/${partner._id}/${index + '.jpg'}`);
             deleteObject(storageRef).then(async ()=>{
                 let data = partner.images
-                if(data) data[index] = ''
+                if(data) data[i] = ''
                 await Partner.findByIdAndUpdate(decoded.userId, {images:data}).then(()=>{
                     console.log('imagem deletada')
                     return res.status(200).send('Imagem deletada com sucesso!')
@@ -448,7 +451,7 @@ export const postOfferService = async (req:Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     const { service } = req.body;
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         await Partner.findByIdAndUpdate(decoded.userId, {$push:{offerServices:service}}).then(()=>{
             return res.status(200).send('Serviço criado com sucesso!')
         }).catch(()=>{
@@ -463,7 +466,7 @@ export const putOfferService = async (req:Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     const { index, name, description, averagePrice } = req.body;
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         await Partner.findById(decoded.userId).then(async (partner)=>{
             const offerServices = partner?.offerServices
             if(offerServices) {
@@ -488,7 +491,7 @@ export const deleteOfferService = async (req:Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     const { index } = req.params;
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         await Partner.findById(decoded.userId).then(async (partner)=>{
             const offerServices = partner?.offerServices
             const nIndex = parseInt(index)
@@ -509,7 +512,7 @@ export const deleteOfferService = async (req:Request, res:Response) => {
 export const getPartnerAbout = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         await Partner.findById(decoded.userId).then((partner)=>{
             const data = partner?.about
             return res.status(200).json(data);
@@ -522,7 +525,7 @@ export const putPartnerAbout = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     const { about } = req.body;
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         await Partner.findByIdAndUpdate(decoded.userId, {about}).then((partner)=>{
             return res.status(200).send('Sobre a empresa alterado com sucesso!');
         }).catch(()=>{
@@ -535,7 +538,7 @@ export const putPartnerAbout = async (req: Request, res:Response) => {
 export const getPartnerQuestions = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         await Partner.findById(decoded.userId).then((partner)=>{
             const data = partner?.questions
             return res.status(200).json(data);
@@ -548,7 +551,7 @@ export const postPartnerQuestion = async (req:Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     const { question } = req.body;
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         await Partner.findByIdAndUpdate(decoded.userId, {$push:{questions:question}}).then(()=>{
             return res.status(200).send('Pergunta criada com sucesso!')
         }).catch(()=>{
@@ -563,7 +566,7 @@ export const putPartnerQuestion = async (req:Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     const { index, ask, response } = req.body;
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         await Partner.findById(decoded.userId).then(async (partner)=>{
             const questions = partner?.questions
             if(questions) {
@@ -587,7 +590,7 @@ export const deletePartnerQuestion = async (req:Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     const { index } = req.params;
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         await Partner.findById(decoded.userId).then(async (partner)=>{
             const questions = partner?.questions
             const nIndex = parseInt(index)
@@ -610,7 +613,7 @@ export const getPartnerBudgets = async (req:Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
 
 
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
 
         await Budget.find().then((budgets)=>{

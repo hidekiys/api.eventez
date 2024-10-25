@@ -1,18 +1,21 @@
+
+
 import { updateMetadata } from "firebase/storage";
 import Chat from "../models/Chat";
 import User from "../models/User";
 import Partner from "../models/Partner";
 import { newNotification } from "./notifications";
-
+import { Request, Response } from "express";
+import { jwtType } from "../types/jwtType";
 const jwt = require('jsonwebtoken');
 
 
 
-export const sendMsg = async (req, res) =>{
+export const sendMsg = async (req:Request, res:Response) =>{
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     try{
-        jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+        jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
             if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
 
 
@@ -50,11 +53,11 @@ export const sendMsg = async (req, res) =>{
 
 }
 
-export const getAllChats = async (req, res) =>{
+export const getAllChats = async (req:Request, res:Response) =>{
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     try{
-        jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+        jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
             if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
             let jsonn:string
             await User.findById(decoded.userId).then( async (user)=>{
@@ -117,11 +120,11 @@ export const getAllChats = async (req, res) =>{
 }
 
 
-export const getAllMessages = async (req, res) =>{
+export const getAllMessages = async (req:Request, res:Response) =>{
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     try{
-        jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+        jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
             if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
 
 

@@ -1,3 +1,4 @@
+
 import express from 'express';
 import helmet from 'helmet';
 import path from 'path';
@@ -5,9 +6,10 @@ import router from './routes';
 import { mongoConnect } from './data/mongoDb';
 import http from 'http'
 import { verifyEventDay, verifyPayment } from './services/crons';
+import {Socket} from 'socket.io'
 const cors = require('cors');
 const { Server } = require('socket.io');
-
+import  './global.d.ts';
 
 mongoConnect();
 
@@ -19,19 +21,28 @@ const io = new Server(httpServer, {
       methods: ["GET", "POST"]
     }})
 
-global.onlineUsers = new Map();
+
+type socketData = {
+        to:string,
+        from:string,
+        message:string
+}
+
+global.onlineUsers = new Map<string, string>();
 
 
-io.on("connection", (socket)=>{
+
+io.on("connection", (socket:Socket)=>{
     global.chatSocket = socket;
 
-    socket.on("add-user", (userId)=>{
+
+    socket.on("add-user", (userId:string)=>{
         
         global.onlineUsers.set(userId, socket.id)
         console.log("o usuário: "+userId+" conectou")
     })
-    socket.on("send-msg",(data)=>{
-        
+    socket.on("send-msg",(data:socketData)=>{
+        console.log(data);
         const sendUserSocket = global.onlineUsers.get(data.to);
         
         if(sendUserSocket) {

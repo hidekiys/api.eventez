@@ -1,3 +1,5 @@
+
+
 import { Request, Response } from 'express';
 const jwt = require('jsonwebtoken');
 import User from '../models/User';
@@ -5,6 +7,7 @@ import Event from '../models/Event';
 import Partner from '../models/Partner';
 import Financial from '../models/Financial';
 import Budget from '../models/Budget';
+import { jwtType } from '../types/jwtType';
 const axios = require('axios');
 
 export const createNewEventController = async(req:Request, res:Response) => {
@@ -13,7 +16,7 @@ export const createNewEventController = async(req:Request, res:Response) => {
     const { name, date, numberOfGuests, hour, endTime } = await req.body
 
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const userEvents = await Event.exists({ owner:decoded.userId, name })
         
@@ -40,7 +43,7 @@ export const editEventController = async(req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     const { name, types, place, date, time, numberOfGuests, description, id, endTime, publicOfEvent } = await req.body.event
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const event = await Event.find({ owner:decoded.userId, _id:id })
         
@@ -61,7 +64,7 @@ export const getEventsController = async(req:Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
     
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const events = await Event.find({ owner:decoded.userId })
         try{
@@ -82,7 +85,7 @@ export const getEventInfoController = async(req:Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
     const id = req.headers.eventid;
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         await User.findById(decoded.userId).then(async (user) => {
             if(!user?.events?.includes(id as string)) {
@@ -115,7 +118,7 @@ export const getEventSummaryController = async(req:Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
     const id = req.headers.eventid;
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const event = await Event.findById(id)
         const user = await User.findById(event?.owner)
@@ -151,7 +154,7 @@ export const deleteEvent = async(req:Request, res:Response) => {
     const id = req.body.eventId;
     
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
 
         
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
@@ -178,7 +181,7 @@ export const deleteTodoController = async(req:Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
     const {id, itemId} = req.body.event;
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
 
         
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
@@ -207,7 +210,7 @@ export const checkTodoItemController = async(req:Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
     const {id, itemId} = req.body.event;
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
 
         
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
@@ -250,7 +253,7 @@ export const createNewTodoItemController = async(req: Request, res:Response) => 
     const token = authHeader && authHeader.split(' ')[1];
     const { description, id } = await req.body.event
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
 
 
@@ -281,7 +284,7 @@ export const getPartnerName = async (req: Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
     const id = req.headers.partnerid
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const partner = await Partner.findById(id);
         return res.json(partner?.name)
@@ -301,7 +304,7 @@ export const putContractService = async (req: Request, res:Response) => {
     
     const { eventId, budgetId, partnerId, paymentMethod }:BodyType = req.body;
     
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         try{
             const user = await User.findById(decoded.userId)
@@ -339,11 +342,21 @@ export const putContractService = async (req: Request, res:Response) => {
                 qr_codes: [{amount: {value: partnerBudget?.value}}]
                 }
             };
-            
+            type responsePixType = {
+                data:{
+                    id:string
+                }
+            }
+            type errorPixType ={
+                response:{
+                    data:{
+                        error_messages:[{code:string}]
+                    }
+                }
+            }
             axios
                 .request(options)
-                .then(async function (response) {
-                console.log(response.data);
+                .then(async function (response:responsePixType) {
                 await Financial.create({
                     users:{
                         user:decoded.userId,
@@ -372,7 +385,7 @@ export const putContractService = async (req: Request, res:Response) => {
                 await Budget.findByIdAndDelete(budgetId)
                 
             })
-            .catch(function (error) {
+            .catch(function (error:errorPixType) {
                 console.error(error.response.data.error_messages[0].code);
                 if(error.response.data.error_messages[0].code == "40002"){
                     return res.status(406).json({
@@ -386,7 +399,11 @@ export const putContractService = async (req: Request, res:Response) => {
 
 
             }else if(paymentMethod == "boleto") {
-                console.log(partnerBudget)
+                type responseBoletoType = {
+                    data:{
+                        id:string
+                    }
+                }
             const options = {
                 method: 'POST',
                 url: 'https://sandbox.api.pagseguro.com/orders',
@@ -420,7 +437,7 @@ export const putContractService = async (req: Request, res:Response) => {
             
             axios
                 .request(options)
-                .then(async function (response) {
+                .then(async function (response:responseBoletoType) {
                 console.log(response.data);
                 await Financial.create({
                     users:{
@@ -447,8 +464,7 @@ export const putContractService = async (req: Request, res:Response) => {
               
             return res.status(200).send(response.data)
             })
-            .catch(function (error) {
-            console.error(error.response.data);
+            .catch(function (error:Error) {
             return res.status(400).json(error)
             });
             }
@@ -524,7 +540,7 @@ export const getPartnerSummaryController = async(req:Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
     const id = req.headers.partnerid;
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const partner = await Partner.findById(id)
         
@@ -548,7 +564,7 @@ export const getEventServices = async(req:Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
     const { eventId } = req.params;
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')};
         if(!eventId) return res.status(404).send('Não foi informado o id do evento.');
 
