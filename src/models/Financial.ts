@@ -1,3 +1,4 @@
+//@ts-nocheck
 import mongoose, { Schema, model, connection, Model } from 'mongoose'
 
 

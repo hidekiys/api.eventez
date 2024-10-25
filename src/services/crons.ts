@@ -1,3 +1,4 @@
+
 var cron = require('node-cron');
 import User from '../models/User';
 import Event from '../models/Event';
@@ -44,10 +45,14 @@ export const verifyPayment = () => cron.schedule('*/10 * * * * *', async () => {
                 url: `https://sandbox.api.pagseguro.com/orders/${item.payment.order}`,
                 headers: {accept: '*/*', Authorization: process.env.PAGBANK_TOKEN}
                 };
-
+                type pagBankType = {
+                    data:{
+                        charges:[{status:undefined | string}]
+                    }
+                }
                 axios
                 .request(options)
-                .then(async function (response) {
+                .then(async function (response:pagBankType) {
                     if(response.data.charges[0].status == undefined) return
                     if(response.data.charges[0].status == 'PAID'){
                         await Financial.findByIdAndUpdate(item._id, {status:{user:"paid", partner:"pending"}})
@@ -61,7 +66,7 @@ export const verifyPayment = () => cron.schedule('*/10 * * * * *', async () => {
                         const event = await Event.findById(item.event)
                     }
                 })
-                .catch(function (error) {
+                .catch(function (error:Error) {
                     
                 });
         })

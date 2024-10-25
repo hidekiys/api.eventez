@@ -1,3 +1,4 @@
+
 import { Request, Response } from 'express';
 import { compare, hash } from 'bcrypt';
 import dotenv from 'dotenv';
@@ -17,12 +18,13 @@ import {ref,  uploadBytesResumable, getDownloadURL} from 'firebase/storage'
 import { newNotification } from './notifications';
 import Financial from '../models/Financial';
 import Budget from '../models/Budget';
+import { jwtType } from '../types/jwtType';
 
 export const getUserController = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const userLogin = await User.findById(decoded.userId);
         return res.json({
@@ -151,7 +153,7 @@ export const registerUserController = async (req:Request, res:Response) => {
                     ]
                         }
 
-            transporter.sendMail(configEmail, (error, info) => {
+            transporter.sendMail(configEmail, (error:Error) => {
                 if (error){
                     console.log('erro no 500 '+error)
                     return res.status(500).send()
@@ -303,7 +305,7 @@ export const putUserInfo = async (req: Request, res:Response) => {
     const { name, email, phone, document } = req.body
     
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         await User.findByIdAndUpdate(decoded.userId, {$set:{
             name:name,
@@ -325,7 +327,7 @@ export const putUserAddress = async (req: Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
     const { address } = req.body
     console.log('passou aqui')
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         await User.findByIdAndUpdate(decoded.userId, {$set:{address}}).then(() => {
             return res.status(202).send('Endereço alterado com sucesso')
@@ -341,10 +343,10 @@ export const putUserAvatar = async (req: Request, res: Response) => {
 
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         return decoded.userId
-    }).then(async(id) => {const user = await User.findById(id)
+    }).then(async(id:string) => {const user = await User.findById(id)
         if(user){
         
             
@@ -370,7 +372,7 @@ export const putUserAvatar = async (req: Request, res: Response) => {
                     },
                     () => {
                         getDownloadURL(uploadTask.snapshot.ref).then( async (url)  => {
-                            fs.unlink(`./uploads/${req.file?.filename}`, function(err){
+                            fs.unlink(`./uploads/${req.file?.filename}`, function(err:Error){
                                 if(err) console.log(err);
                             });
                             await User.findByIdAndUpdate(id, {$set:{url_avatar:url}})
@@ -405,7 +407,7 @@ export const getAddressController = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const userLogin = await User.findById(decoded.userId);
         return res.json({
@@ -423,7 +425,7 @@ export const getPhoneController = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const userLogin = await User.findById(decoded.userId);
         return res.json({
@@ -435,7 +437,7 @@ export const getDocumentController = async (req: Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const userLogin = await User.findById(decoded.userId);
         return res.json({
@@ -448,7 +450,7 @@ export const getUserAvatarController = async (req: Request, res: Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const userLogin = await User.findById(decoded.userId);
         return res.json({
@@ -465,7 +467,7 @@ export const putRequestBudget = async (req: Request, res:Response) => {
 
     const { eventId, services, partnerId, description } = req.body;
 
-    const decoded = jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    const decoded = jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         
         try{
@@ -524,7 +526,7 @@ export const newPaymentMethod = async (req: Request, res:Response) => {
 
     const { card } = req.body;
 
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
         const user = await User.findById(decoded.userId);
         if(!user) return res.status(400).send('Usuário não encontrado')
@@ -548,16 +550,22 @@ export const newPaymentMethod = async (req: Request, res:Response) => {
 
             }
           };
-          
+          type responsePix = {
+            data:{
+                id:string,
+                last_digits:string,
+                brand:string
+            }
+          }
           axios
             .request(options)
-            .then(async function (response) {
+            .then(async function (response:responsePix) {
               console.log(response.data);
               user.updateOne({$push:{cards:{token:response.data.id, lastNumbers:response.data.last_digits,brand:response.data.brand}}})
               
               res.status(200).json(response.data)
             })
-            .catch(function (error) {
+            .catch(function (error:Error) {
               console.error(error);
               res.status(400).json(error)
             });
@@ -574,7 +582,7 @@ export const getUserBudgets = async (req:Request, res:Response) => {
     const token = authHeader && authHeader.split(' ')[1];
 
 
-    jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+    jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
         if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
 
         await Budget.find().then((budgets)=>{

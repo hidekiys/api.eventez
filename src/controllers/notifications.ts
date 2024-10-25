@@ -1,8 +1,10 @@
+
 import Event from "../models/Event";
 import Notifications from "../models/Notifications"
 import { Request, Response} from 'express'
 import User from "../models/User";
 import Partner from "../models/Partner";
+import { jwtType } from "../types/jwtType";
 
 const jwt = require('jsonwebtoken');
 
@@ -34,7 +36,7 @@ export const getNotifications = async (req:Request, res:Response) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     try{
-        jwt.verify(token, process.env.SECRET, async (err, decoded)=>{
+        jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
             if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
   await Notifications.find().sort({updatedAt: -1}).then( async(find)=>{
         let data: any = find.filter((filter)=> filter.users.receiver == decoded.userId)

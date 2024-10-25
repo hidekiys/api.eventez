@@ -1,3 +1,4 @@
+
 import { Request, Response } from 'express';
 import Partner from '../models/Partner';
 
