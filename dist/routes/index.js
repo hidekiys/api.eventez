@@ -17,6 +17,7 @@ var chat_1 = require("../controllers/chat");
 var services_1 = require("../controllers/services");
 var notifications_1 = require("../controllers/notifications");
 var financial_1 = require("../controllers/financial");
+var review_1 = require("../controllers/review");
 var upload = (0, multer_1.default)({
     dest: 'uploads/'
 });
@@ -39,6 +40,9 @@ router.put('/putUserAvatar', upload.single('photo'), verifyJWT_1.verifyJWT, user
 router.get('/getUserAvatar', verifyJWT_1.verifyJWT, user_1.getUserAvatarController);
 router.post('/newPaymentMethod', user_1.newPaymentMethod);
 router.get('/getDocument', verifyJWT_1.verifyJWT, user_1.getDocumentController);
+//Reviews
+router.get('/getReviews/:partnerId', review_1.getReviews);
+router.post('/postReview', verifyJWT_1.verifyJWT, review_1.postReview);
 //Event
 router.post('/createNewEvent', verifyJWT_1.verifyJWT, verifySchema_1.verifyEvent, event_1.createNewEventController);
 router.put('/editEvent', verifyJWT_1.verifyJWT, verifySchema_1.verifyEvent, event_1.editEventController);
