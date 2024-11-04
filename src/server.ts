@@ -16,7 +16,7 @@ const server = express();
 const httpServer = http.createServer(server)
 const io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:3000",
+      origin: "https://www.eventez.com.br",
       methods: ["GET", "POST"]
     }})
 
