@@ -2,7 +2,7 @@
 import mongoose, { Schema, model, connection, Model } from 'mongoose'
 
 
-import { FinancialType } from '../services/FinancialSchema';
+import { FinancialType } from '../services/financialSchema';
 
 
 const schema = new Schema<FinancialType>({
