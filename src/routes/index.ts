@@ -15,6 +15,7 @@ import { getAllChats, getAllMessages, sendMsg } from '../controllers/chat';
 import { getFamousServices, getPlaces, getServicesPagination, searchServices } from '../controllers/services';
 import { getNotifications } from '../controllers/notifications';
 import { getEventFinancial, getPartnerFinancial } from '../controllers/financial';
+import { getReviews, postReview } from '../controllers/review';
 
 const upload = multer({
     dest: 'uploads/'
@@ -41,8 +42,9 @@ router.get('/getUserAvatar', verifyJWT, getUserAvatarController)
 router.post('/newPaymentMethod', newPaymentMethod)
 router.get('/getDocument', verifyJWT, getDocumentController)
 
-
-
+//Reviews
+router.get('/getReviews/:partnerId', getReviews)
+router.post('/postReview', verifyJWT, postReview)
 //Event
 router.post('/createNewEvent', verifyJWT, verifyEvent, createNewEventController)
 router.put('/editEvent', verifyJWT, verifyEvent, editEventController)
