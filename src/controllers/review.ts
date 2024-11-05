@@ -4,6 +4,7 @@ import Partner from "../models/Partner";
 import { Request, Response} from 'express'
 import { jwtType } from "../types/jwtType";
 import Reviews from "../models/Reviews";
+import { ReviewType } from "../services/reviewsSchema";
 const jwt = require('jsonwebtoken');
 
 
@@ -56,7 +57,7 @@ export const postReview = async (req:Request, res:Response) => {
         jwt.verify(token, process.env.SECRET, async (err:Error, decoded:jwtType)=>{
             if(err){return res.status(500).send('Token fornecido não foi autorizado.')}
             if(reviewBody){
-                Reviews.create({
+                await Reviews.create({
                     writer: decoded.userId,
                     partnerId:reviewBody.partnerId,
                     text:{
@@ -64,23 +65,34 @@ export const postReview = async (req:Request, res:Response) => {
                         description:reviewBody.text.description
                     },
                     rate:reviewBody.rate
-                })
-                const partnerReviews = ((await Reviews.find()).filter((filter)=>filter.partnerId == reviewBody.partnerId));
-                await Partner.findById(reviewBody.partnerId).then(async (partner)=>{
-                    if(partner != null){
-                        if(partner.rate){
-                            const newRate = (partner.rate +reviewBody.rate)/partnerReviews.length
-                            await partner.updateOne({rate:newRate}).then(()=>{
-                                return res.status(200).send('Review criado com sucesso!')
-                            });
-                        }else{
-                            await partner.updateOne({rate:reviewBody.rate}).then(()=>{
-                                return res.status(200).send('Review criado com sucesso!')
-                            });
+                }).then(async()=>{
+                    const allReviews = await Reviews.find()
+                    const partnerReviews:ReviewType[] = allReviews.filter((filter)=>filter.partnerId == reviewBody.partnerId);
+                    await Partner.findById(reviewBody.partnerId).then(async (partner)=>{
+                        if(partner != null){
+                            if(partner.rate){
+                                var num = 0
+                                partnerReviews.forEach((pReviews, i)=>{
+                                    if(pReviews){
+                                        num+=pReviews.rate
+                                        console.log('num:'+num)
+                                    }
+                                })
+                                const newRate = num/partnerReviews.length
+                                console.log(newRate)
+                                await partner.updateOne({rate:newRate}).then(()=>{
+                                    return res.status(200).send('Review criado com sucesso!')
+                                });
+                            }else{
+                                await partner.updateOne({rate:reviewBody.rate}).then(()=>{
+                                    return res.status(200).send('Review criado com sucesso!')
+                                });
+                            }
+                            
                         }
-                        
-                    }
+                    })
                 })
+
             }
         })
     }catch{
