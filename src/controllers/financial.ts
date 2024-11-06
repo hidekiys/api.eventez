@@ -1,5 +1,5 @@
 
-import { FinancialType } from "../services/FinancialSchema";
+import { FinancialType } from "../services/financialSchema";
 import { Request, Response } from 'express';
 const jwt = require('jsonwebtoken');
 import User from '../models/User';

@@ -53,16 +53,29 @@ export const verifyPayment = () => cron.schedule('*/10 * * * * *', async () => {
                 axios
                 .request(options)
                 .then(async function (response:pagBankType) {
-                    if(response.data.charges[0].status == undefined) return
+                    if(response.data.charges[0].status == undefined) return;
                     if(response.data.charges[0].status == 'PAID'){
                         await Financial.findByIdAndUpdate(item._id, {status:{user:"paid", partner:"pending"}})
-                        await Event.findByIdAndUpdate(item.event, {$push:{
-                            services:{
-                                services: item.service.service,
-                                partnerId:item.users.partner,
-                                description:item.service.description,
-                                value:item.value,
-                        }}})
+                        await Event.findById(item.event).then((event)=>{
+                            if(event){
+                                const filterService = event.services?.filter((filter)=>filter.partnerId ==item.users.partner).length
+                                if(filterService != undefined && filterService > 0){
+                                    console.log(filterService);
+                                    return;
+
+
+                                }else{
+                                    console.log(filterService)
+                                    event.updateOne({$push:{
+                                        services:{
+                                            services: item.service.service,
+                                            partnerId:item.users.partner,
+                                            description:item.service.description,
+                                            value:item.value,
+                                    }}})
+                                };
+                            }
+                        })
                         const event = await Event.findById(item.event)
                     }
                 })
